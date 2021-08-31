@@ -66,7 +66,7 @@ class MenuPanel(ScreenPanel):
             parsed_name = j2_temp.render()
 
             b = self._gtk.ButtonImage(
-                item['icon'], parsed_name, "color"+str((i%4)+1)
+                item['icon'], parsed_name, "color"+str((i%8)+1)
             )
             if item['panel'] != False:
                 b.connect("clicked", self.menu_item_clicked, item['panel'], item)

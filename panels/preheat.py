@@ -55,7 +55,7 @@ class PreheatPanel(ScreenPanel):
 
         i = 0
         for option in  self.preheat_options:
-            self.labels[option] = self._gtk.Button(option, "color%d" % ((i%4)+1))
+            self.labels[option] = self._gtk.Button(option, "color%d" % ((i%8)+1))
             self.labels[option].connect("clicked", self.set_temperature, option)
             self.labels['control_grid'].attach(
                 self.labels[option],

@@ -43,6 +43,22 @@ button.color4 {
 	border-bottom: .4em solid #A7E100;
 }
 
+button.color5 {
+	border-bottom: .4em solid #e6d300;
+}
+
+button.color6 {
+	border-bottom: .4em solid #00c9b4;
+}
+
+button.color7 {
+	border-bottom: .4em solid #560fd1;
+}
+
+button.color8 {
+	border-bottom: .4em solid #c8adf8;
+}
+
 button.active {
 	background-color: #20303D;
 }

@@ -46,7 +46,7 @@ class PrintPanel(ScreenPanel):
         sbox.add(sort)
         i = 1
         for name, val in self.sort_items.items():
-            s = self._gtk.Button(val, "color%s" % (i%4))
+            s = self._gtk.Button(val, "color%s" % (i%8))
             s.set_label(val)
             if name == sortdir[0]:
                 s.set_label("%s %s" % (s.get_label(), self.sort_char[self.sort_current[1]]))
