@@ -121,9 +121,7 @@ class KlipperScreenConfig:
             {"print_estimate_method": {
                 "section": "main", "name": _("Estimated Time Method"), "type": "dropdown",
                 "value": "file", "options": [
-                    {"name": _("File") + " " + _("(default)"), "value": "file"},
-                    {"name": _("Duration Only"), "value": "duration"},
-                    {"name": _("Filament Used"), "value": "filament"},
+                    {"name": _("Auto") + " " + _("(default)"), "value": "auto"},
                     {"name": _("Slicer"), "value": "slicer"}]}},
             {"screen_blanking": {
                 "section": "main", "name": _("Screen Power Off Time"), "type": "dropdown",
@@ -146,6 +144,9 @@ class KlipperScreenConfig:
                     {"name": _("Large"), "value": "large"}]}},
             {"confirm_estop": {"section": "main", "name": _("Confirm Emergency Stop"), "type": "binary",
                                "value": "False"}},
+            {"print_estimate_compensation": {
+                "section": "main", "name": _("Slicer Time correction (%)"), "type": "scale", "value": "100",
+                "range": [50, 150], "step": 1}},
             # {"": {"section": "main", "name": _(""), "type": ""}}
         ]
 

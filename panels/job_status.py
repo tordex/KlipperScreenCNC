@@ -24,7 +24,6 @@ class JobStatusPanel(ScreenPanel):
 
     def initialize(self, panel_name):
         _ = self.lang.gettext
-        self.timeleft_type = "file"
         self.timeout = None
         self.close_timeouts = []
 
@@ -129,13 +128,10 @@ class JobStatusPanel(ScreenPanel):
         self.labels['elapsed'].get_style_context().add_class("printing-info")
         self.labels['duration'] = Gtk.Label(label="0s")
         self.labels['duration'].get_style_context().add_class("printing-info")
-        self.labels['est_time'] = Gtk.Label(label="/ 0s")
-        self.labels['est_time'].get_style_context().add_class("printing-info")
         it_box = Gtk.Box(spacing=0)
         it_box.add(clock)
         it_box.add(self.labels['elapsed'])
         it_box.add(self.labels['duration'])
-        it_box.add(self.labels['est_time'])
         self.labels['it_box'] = it_box
 
         position = self._gtk.Image("move.svg", None, .6, .6)
@@ -420,29 +416,53 @@ class JobStatusPanel(ScreenPanel):
 
         self.update_percent_complete()
         self.update_text("duration", str(self._gtk.formatTimeString(ps['print_duration'])))
+        self.update_text("time_left", self.calculate_time_left(ps['print_duration'], ps['filament_used']))
 
-        timeleft_type = self._config.get_config()['main'].get('print_estimate_method', 'file')
-        if timeleft_type != self.timeleft_type:
-            if self.timeleft_type == "duration":
-                self.labels['it_box'].add(self.labels['est_time'])
-            elif timeleft_type == "duration":
-                self.labels['it_box'].remove(self.labels['est_time'])
-            self.timeleft_type = timeleft_type
+    def calculate_time_left(self, duration=0, filament_used=0):
+        timeleft_type = self._config.get_config()['main'].get('print_estimate_method', 'auto')
+        slicer_correction = (self._config.get_config()['main'].getint('print_estimate_compensation', 100) / 100)
+        total_duration = slicer_time = filament_time = file_time = None
+        # speed_factor compensation based on empirical testing
+        spdcomp = math.sqrt(self.speed / 100)
 
-        if timeleft_type in ['filament', 'file', 'slicer']:
-            duration = ps['print_duration']
-            if timeleft_type == "filament":
-                estimated_filament = (self.file_metadata['filament_total'] if "filament_total" in self.file_metadata
-                                      else 1)
-                total_duration = duration / (max(ps['filament_used'], 0.0001) / max(estimated_filament, 0.0001))
-            elif timeleft_type == "file":
-                total_duration = duration / max(self.progress, 0.0001)
-            elif timeleft_type == "slicer":
-                total_duration = (self.file_metadata['estimated_time'] if "estimated_time" in self.file_metadata
-                                  else duration)
-            time_left = max(total_duration - duration, 0)
-            self.update_text("time_left", str(self._gtk.formatTimeString(time_left)))
-            self.update_text("est_time", "/ %s" % str(self._gtk.formatTimeString(total_duration)))
+        if "estimated_time" in self.file_metadata:
+            if self.file_metadata['estimated_time'] > 0:
+                slicer_time = (self.file_metadata['estimated_time'] * slicer_correction) / spdcomp
+                if slicer_time < duration:
+                    slicer_time = None
+
+        if "filament_total" in self.file_metadata:
+            if self.file_metadata['filament_total'] > 0 and filament_used > 0:
+                if self.file_metadata['filament_total'] > filament_used:
+                    filament_time = duration / (filament_used / self.file_metadata['filament_total'])
+                    if filament_time < duration:
+                        filament_time = None
+
+        if self.progress > 0.01:
+            file_time = duration / self.progress
+
+        if slicer_time is not None:
+            if timeleft_type == "slicer":
+                total_duration = slicer_time
+            else:
+                if filament_time is not None and self.progress > 0.14:
+                    # Weighted arithmetic mean (Slicer is the most accurate)
+                    total_duration = (slicer_time * 3 + filament_time + file_time) / 5
+                elif self.progress > 0.98:
+                    # Reaching the end, file tends to be the most accurate
+                    total_duration = file_time
+                else:
+                    # At the begining file and filament are innacurate
+                    total_duration = slicer_time
+        elif file_time is not None:
+            if filament_time is not None:
+                total_duration = (filament_time + file_time) / 2
+            else:
+                total_duration = file_time
+
+        if total_duration is None:
+            return "-"
+        return str(self._gtk.formatTimeString((total_duration - duration)))
 
     def state_check(self):
         ps = self._printer.get_stat("print_stats")
@@ -559,9 +579,6 @@ class JobStatusPanel(ScreenPanel):
         if self._files.file_metadata_exists(self.filename):
             self.file_metadata = self._files.get_file_info(self.filename)
             logging.info("Update Metadata. File: %s Size: %s" % (self.filename, self.file_metadata['size']))
-            if "estimated_time" in self.file_metadata and self.timeleft_type == "slicer":
-                self.update_text("est_time", "/ %s" %
-                                 str(self._gtk.formatTimeString(self.file_metadata['estimated_time'])))
             if "thumbnails" in self.file_metadata:
                 tmp = self.file_metadata['thumbnails'].copy()
                 for i in tmp:
