@@ -376,7 +376,7 @@ class KlipperScreen(Gtk.Window):
         self.show_all()
         self.popup_message = box
 
-        GLib.timeout_add(10000, self.close_popup_message)
+        GLib.timeout_add_seconds(10, self.close_popup_message)
 
         return False
 
@@ -637,7 +637,7 @@ class KlipperScreen(Gtk.Window):
             return
         os.system("xset -display :0 dpms 0 %s 0" % time)
         if self.dpms_timeout is None and functions.dpms_loaded is True:
-            self.dpms_timeout = GLib.timeout_add(500, self.check_dpms_state)
+            self.dpms_timeout = GLib.timeout_add_seconds(1, self.check_dpms_state)
 
     def set_updating(self, updating=False):
         if self.updating is True and updating is False:
