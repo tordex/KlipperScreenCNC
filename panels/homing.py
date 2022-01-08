@@ -79,7 +79,7 @@ class MovePanel(ScreenPanel):
                     self.labels['pos_x'].set_text("X: %.2f" % (data["toolhead"]["position"][0]))
             else:
                 self.labels['pos_x'].set_text("X: ?")
-            if "y"  in homed_axes:
+            if "y" in homed_axes:
                 if "toolhead" in data and "position" in data["toolhead"]:
                     self.labels['pos_y'].set_text("Y: %.2f" % (data["toolhead"]["position"][1]))
             else:

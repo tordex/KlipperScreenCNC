@@ -47,9 +47,10 @@ class MovePanel(ScreenPanel):
             })
 
         self.labels['motors-off'] = self._gtk.ButtonImage("motor-off", _("Disable Motors"), "color4")
-        script={"script":"M18"}
+        script = {"script" : "M18"}
         self.labels['motors-off'].connect("clicked", self._screen._confirm_send_action,
-                         _("Are you sure you wish to disable motors?"), "printer.gcode.script", script)
+                                          _("Are you sure you wish to disable motors?"),
+                                          "printer.gcode.script", script)
 
         if self._screen.lang_ltr:
             grid.attach(self.labels['x+'], 2, 1, 1, 1)
@@ -122,7 +123,7 @@ class MovePanel(ScreenPanel):
                     self.labels['pos_x'].set_text("X: %.2f" % (data["toolhead"]["position"][0]))
             else:
                 self.labels['pos_x'].set_text("X: ?")
-            if "y"  in homed_axes:
+            if "y" in homed_axes:
                 if "toolhead" in data and "position" in data["toolhead"]:
                     self.labels['pos_y'].set_text("Y: %.2f" % (data["toolhead"]["position"][1]))
             else:
