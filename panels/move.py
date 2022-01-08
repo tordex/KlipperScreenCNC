@@ -47,7 +47,7 @@ class MovePanel(ScreenPanel):
             })
 
         self.labels['motors-off'] = self._gtk.ButtonImage("motor-off", _("Disable Motors"), "color4")
-        script = {"script" : "M18"}
+        script = {"script": "M18"}
         self.labels['motors-off'].connect("clicked", self._screen._confirm_send_action,
                                           _("Are you sure you wish to disable motors?"),
                                           "printer.gcode.script", script)
