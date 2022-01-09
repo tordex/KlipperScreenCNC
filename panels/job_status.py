@@ -135,21 +135,22 @@ class JobStatusPanel(ScreenPanel):
         self.labels['it_box'] = it_box
 
         position = self._gtk.Image("move.svg", None, .6, .6)
-        self.labels['pos_x'] = Gtk.Label(label="X: 0")
-        self.labels['pos_x'].get_style_context().add_class("printing-info")
-        self.labels['pos_y'] = Gtk.Label(label="Y: 0")
-        self.labels['pos_y'].get_style_context().add_class("printing-info")
         self.labels['pos_z'] = Gtk.Label(label="Z: 0")
         self.labels['pos_z'].get_style_context().add_class("printing-info")
         pos_box = Gtk.Box(spacing=0)
-        posgrid = self._gtk.HomogeneousGrid()
-        posgrid.set_hexpand(True)
-        posgrid.attach(self.labels['pos_x'], 0, 0, 1, 1)
-        posgrid.attach(self.labels['pos_y'], 1, 0, 1, 1)
-        posgrid.attach(self.labels['pos_z'], 2, 0, 1, 1)
         pos_box.add(position)
-        pos_box.add(posgrid)
-        self.labels['pos_box'] = pos_box
+        pos_box.add(self.labels['pos_z'])
+        speed = self._gtk.Image("speed+.svg", None, .6, .6)
+        self.labels['cur_speed'] = Gtk.Label(label="")
+        self.labels['cur_speed'].get_style_context().add_class("printing-info")
+        spd_box = Gtk.Box(spacing=0)
+        spd_box.add(speed)
+        spd_box.add(self.labels['cur_speed'])
+        pv_grid = self._gtk.HomogeneousGrid()
+        pv_grid.attach(pos_box, 0, 0, 1, 1)
+        pv_grid.attach(spd_box, 1, 0, 1, 1)
+        pv_grid.set_hexpand(True)
+        self.labels['pv_grid'] = pv_grid
 
         speed = self._gtk.Image("speed+.svg", None, .6, .6)
         self.labels['speed'] = Gtk.Label(label="")
@@ -240,7 +241,7 @@ class JobStatusPanel(ScreenPanel):
 
         self.labels['i1_box'].add(self.labels['thumbnail'])
         self.labels['i2_box'].add(self.labels['temp_grid'])
-        self.labels['i2_box'].add(self.labels['pos_box'])
+        self.labels['i2_box'].add(self.labels['pv_grid'])
         self.labels['i2_box'].add(self.labels['sfe_grid'])
         self.labels['i2_box'].add(self.labels['it_box'])
         self.labels['i2_box'].add(self.labels['itl_box'])
@@ -393,9 +394,6 @@ class JobStatusPanel(ScreenPanel):
                     self.current_extruder = data["toolhead"]["extruder"]
                     self.labels['temp_grid'].attach(self.labels[self.current_extruder + '_box'], 0, 0, 1, 1)
                     self._screen.show_all()
-            if "position" in data["toolhead"]:
-                self.labels['pos_x'].set_text("X: %.2f" % (data["toolhead"]["position"][0]))
-                self.labels['pos_y'].set_text("Y: %.2f" % (data["toolhead"]["position"][1]))
         if "gcode_move" in data and "gcode_position" in data["gcode_move"]:
             self.labels['pos_z'].set_text("Z: %.2f" % (data["gcode_move"]["gcode_position"][2]))
 
@@ -406,6 +404,9 @@ class JobStatusPanel(ScreenPanel):
             if "speed_factor" in data["gcode_move"]:
                 self.speed = int(data["gcode_move"]["speed_factor"]*100)
                 self.labels['speed'].set_text("%3d%%" % self.speed)
+            if "speed" in data["gcode_move"]:
+                self.cur_speed = int(data["gcode_move"]["speed"]/100)
+                self.labels['cur_speed'].set_text("%d mm/s" % self.cur_speed)
 
         if "fan" in data and "speed" in data['fan']:
             self.fan = int(round(data['fan']['speed'], 2)*100)
