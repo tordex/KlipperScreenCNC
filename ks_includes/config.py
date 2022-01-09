@@ -130,8 +130,8 @@ class KlipperScreenConfig:
             }},
             {"theme": {
                 "section": "main", "name": _("Icon Theme"), "type": "dropdown",
-                "value": "z-bolt", "callback": screen.restart_warning, "options": [
-                    {"name": "Z-bolt" + " " + _("(default)"), "value": "z-bolt"}]}},
+                "value": "colorized-fusion", "callback": screen.restart_warning, "options": [
+                    {"name": "Colorized-fusion" + " " + _("(default)"), "value": "colorized-fusion"}]}},
             {"24htime": {"section": "main", "name": _("24 Hour Time"), "type": "binary", "value": "True"}},
             {"side_macro_shortcut": {
                 "section": "main", "name": _("Macro shortcut on sidebar"), "type": "binary",
