@@ -768,7 +768,8 @@ class KlipperScreen(Gtk.Window):
 
         if action == "notify_klippy_disconnected":
             logging.debug("Received notify_klippy_disconnected")
-            self.printer.change_state("disconnected")
+            #self.printer.change_state("disconnected")
+            os.system("sudo systemctl restart KlipperScreen")
             return
         elif action == "notify_klippy_ready":
             self.printer.change_state("ready")
