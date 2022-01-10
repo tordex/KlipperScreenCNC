@@ -405,7 +405,7 @@ class JobStatusPanel(ScreenPanel):
                 self.speed = int(data["gcode_move"]["speed_factor"]*100)
                 self.labels['speed'].set_text("%3d%%" % self.speed)
             if "speed" in data["gcode_move"]:
-                self.cur_speed = int(data["gcode_move"]["speed"]/100)
+                self.cur_speed = int(data["gcode_move"]["speed"]/60)
                 self.labels['cur_speed'].set_text("%d mm/s" % self.cur_speed)
 
         if "fan" in data and "speed" in data['fan']:
