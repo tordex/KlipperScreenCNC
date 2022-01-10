@@ -420,46 +420,45 @@ class JobStatusPanel(ScreenPanel):
         self.update_text("time_left", self.calculate_time_left(ps['print_duration'], ps['filament_used']))
 
     def calculate_time_left(self, duration=0, filament_used=0):
-        timeleft_type = self._config.get_config()['main'].get('print_estimate_method', 'auto')
-        slicer_correction = (self._config.get_config()['main'].getint('print_estimate_compensation', 100) / 100)
-        total_duration = slicer_time = filament_time = file_time = None
-        # speed_factor compensation based on empirical testing
-        spdcomp = math.sqrt(self.speed / 100)
+        total_duration = None
+        if self.progress < 1:
+            slicer_time = filament_time = file_time = None
+            timeleft_type = self._config.get_config()['main'].get('print_estimate_method', 'auto')
+            slicer_correction = (self._config.get_config()['main'].getint('print_estimate_compensation', 100) / 100)
+            # speed_factor compensation based on empirical testing
+            spdcomp = math.sqrt(self.speed / 100)
 
-        if "estimated_time" in self.file_metadata:
-            if self.file_metadata['estimated_time'] > 0:
-                slicer_time = (self.file_metadata['estimated_time'] * slicer_correction) / spdcomp
-                if slicer_time < duration:
-                    slicer_time = None
+            if "estimated_time" in self.file_metadata:
+                if self.file_metadata['estimated_time'] > 0:
+                    slicer_time = (self.file_metadata['estimated_time'] * slicer_correction) / spdcomp
+                    if slicer_time < duration:
+                        slicer_time = None
 
-        if "filament_total" in self.file_metadata:
-            if self.file_metadata['filament_total'] > 0 and filament_used > 0:
-                if self.file_metadata['filament_total'] > filament_used:
-                    filament_time = duration / (filament_used / self.file_metadata['filament_total'])
-                    if filament_time < duration:
-                        filament_time = None
+            if "filament_total" in self.file_metadata:
+                if self.file_metadata['filament_total'] > 0 and filament_used > 0:
+                    if self.file_metadata['filament_total'] > filament_used:
+                        filament_time = duration / (filament_used / self.file_metadata['filament_total'])
+                        if filament_time < duration:
+                            filament_time = None
 
-        if self.progress > 0.01:
-            file_time = duration / self.progress
+            if self.progress > 0.01:
+                file_time = duration / self.progress
 
-        if slicer_time is not None:
-            if timeleft_type == "slicer":
-                total_duration = slicer_time
-            else:
-                if filament_time is not None and self.progress > 0.14:
-                    # Weighted arithmetic mean (Slicer is the most accurate)
-                    total_duration = (slicer_time * 3 + filament_time + file_time) / 5
-                elif self.progress > 0.98:
-                    # Reaching the end, file tends to be the most accurate
-                    total_duration = file_time
-                else:
-                    # At the begining file and filament are innacurate
+            if slicer_time is not None:
+                if timeleft_type == "slicer":
                     total_duration = slicer_time
-        elif file_time is not None:
-            if filament_time is not None:
-                total_duration = (filament_time + file_time) / 2
-            else:
-                total_duration = file_time
+                else:
+                    if filament_time is not None and self.progress > 0.14:
+                        # Weighted arithmetic mean (Slicer is the most accurate)
+                        total_duration = (slicer_time * 3 + filament_time + file_time) / 5
+                    else:
+                        # At the begining file and filament are innacurate
+                        total_duration = slicer_time
+            elif file_time is not None:
+                if filament_time is not None:
+                    total_duration = (filament_time + file_time) / 2
+                else:
+                    total_duration = file_time
 
         if total_duration is None:
             return "-"
