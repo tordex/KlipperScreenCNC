@@ -361,9 +361,16 @@ class TemperaturePanel(ScreenPanel):
         da.set_vexpand(True)
         self.labels['da'] = da
 
+        scroll = Gtk.ScrolledWindow()
+        scroll.set_property("overlay-scrolling", False)
+        scroll.set_hexpand(True)
+        scroll.set_vexpand(True)
+        scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.add(self.labels['devices'])
+
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         box.set_vexpand(True)
-        box.add(self.labels['devices'])
+        box.add(scroll)
         box.add(da)
 
 
@@ -382,7 +389,6 @@ class TemperaturePanel(ScreenPanel):
 
         for d in self._printer.get_temp_store_devices():
             self.add_device(d)
-
         return box
 
 
