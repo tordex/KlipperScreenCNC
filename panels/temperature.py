@@ -391,6 +391,7 @@ class TemperaturePanel(ScreenPanel):
             self.add_device(d)
         graph_height = max(0, self._screen.height - (i * 6 * self._gtk.get_font_size()))
         self.labels['da'].set_size_request(0, graph_height)
+
         return box
 
 
