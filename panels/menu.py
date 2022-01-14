@@ -42,9 +42,14 @@ class MenuPanel(ScreenPanel):
             logging.debug("Evaluating item: %s" % key)
             if not self.evaluate_enable(item[key]['enable']):
                 continue
-            # Arrange 2 x 2
-            if length <= 4 and columns == 4:
-                columns = 2
+
+            if columns == 4:
+                if length <= 4:
+                    # Arrange 2 x 2
+                    columns = 2
+                elif length > 4 and length <= 6:
+                    # Arrange 3 x 3
+                    columns = 3
 
             col = i % columns
             row = int(i/columns)
