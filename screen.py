@@ -688,7 +688,7 @@ class KlipperScreen(Gtk.Window):
         self.base_panel.show_macro_shortcut(False)
         msg = self.printer.get_stat("webhooks", "state_message")
 
-        if "ready" in msg: # Print error
+        if "ready" in msg:  # Print error
             msg = self.printer.get_stat("print_stats", "message")
             logging.info("print_stats message: %s", msg)
             self.show_popup_message(msg)
