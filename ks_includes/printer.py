@@ -118,18 +118,16 @@ class Printer:
 
         if wh_state == "ready":
             new_state = "ready"
-            print_state = self.data['print_stats']['state'].lower()  # complete, paused, printing, standby
-            idle_state = self.data['idle_timeout']['state'].lower()  # idle, printing, ready
-            if print_state == "paused":
-                new_state = "paused"
-            elif idle_state == "printing":
-                if print_state == "complete":
-                    new_state = "ready"
-                elif print_state != "printing":  # Not printing a file, toolhead moving
+            print_state = self.data['print_stats']['state']
+            if print_state:
+                print_state = print_state.lower()  # complete, error, paused, printing, standby
+                if not (print_state == "standby" or print_state == "complete"):
+                    new_state = print_state
+            idle_state = self.data['idle_timeout']['state']
+            if idle_state:
+                idle_state = idle_state.lower()  # idle, printing, ready
+                if idle_state == "printing" and print_state != "printing":  # Not printing a file, toolhead moving
                     new_state = "busy"
-                else:
-                    new_state = "printing"
-
             if new_state != "busy":
                 self.change_state(new_state)
         else:

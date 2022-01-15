@@ -678,6 +678,7 @@ class KlipperScreen(Gtk.Window):
                 continue
             # del self.panels[panel]
 
+
     def state_error(self, prev_state):
         if "printer_select" in self._cur_panels:
             self.printer_select_callbacks = [self.state_error]
@@ -686,6 +687,13 @@ class KlipperScreen(Gtk.Window):
         _ = self.lang.gettext
         self.base_panel.show_macro_shortcut(False)
         msg = self.printer.get_stat("webhooks", "state_message")
+
+        if "ready" in msg: # Print error
+            msg = self.printer.get_stat("print_stats", "message")
+            logging.info("print_stats message: %s", msg)
+            self.show_popup_message(msg)
+            return
+
         if "FIRMWARE_RESTART" in msg:
             self.printer_initializing(
                 _("Klipper has encountered an error.\nIssue a FIRMWARE_RESTART to attempt fixing the issue.")
