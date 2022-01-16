@@ -687,12 +687,9 @@ class KlipperScreen(Gtk.Window):
         _ = self.lang.gettext
         self.base_panel.show_macro_shortcut(False)
         msg = self.printer.get_stat("webhooks", "state_message")
-
-        if "ready" in msg:  # Print error
-            msg = self.printer.get_stat("print_stats", "message")
-            logging.info("print_stats message: %s", msg)
-            self.show_popup_message(msg)
-            return
+        msg2 = self.printer.get_stat("print_stats", "message")
+        if msg2:
+            msg += "\n\n" + msg2
 
         if "FIRMWARE_RESTART" in msg:
             self.printer_initializing(
@@ -776,7 +773,7 @@ class KlipperScreen(Gtk.Window):
 
         if action == "notify_klippy_disconnected":
             logging.debug("Received notify_klippy_disconnected")
-            # self.printer.change_state("disconnected")
+            self.printer.change_state("disconnected")
             os.system("sudo systemctl restart KlipperScreen")
             return
         elif action == "notify_klippy_ready":
@@ -798,6 +795,7 @@ class KlipperScreen(Gtk.Window):
             if "Klipper state: Shutdown" in data:
                 logging.debug("Shutdown in gcode response, changing state to shutdown")
                 self.printer.change_state("shutdown")
+                os.system("sudo systemctl restart KlipperScreen")
 
             if not (data.startswith("B:") and
                     re.search(r'B:[0-9\.]+\s/[0-9\.]+\sT[0-9]+:[0-9\.]+', data)):
