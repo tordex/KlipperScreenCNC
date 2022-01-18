@@ -121,7 +121,7 @@ class Printer:
             print_state = self.data['print_stats']['state']
             if print_state:
                 print_state = print_state.lower()  # complete, error, paused, printing, standby
-                if not (print_state == "standby" or print_state == "complete"):
+                if not (print_state == "standby" or print_state == "complete" or print_state == "error"):
                     new_state = print_state
             idle_state = self.data['idle_timeout']['state']
             if idle_state:
