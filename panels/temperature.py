@@ -205,32 +205,23 @@ class TemperaturePanel(ScreenPanel):
                 return
 
             for heater in self.active_heaters:
-                MAX_TEMP = int(self._printer.get_config_section(heater)['max_temp'])
                 if heater.startswith('extruder'):
                     target = self.preheat_options[setting]["extruder"]
-                    if target > 0 and target <= MAX_TEMP:
-                        self._screen._ws.klippy.set_tool_temp(self._printer.get_tool_number(heater), target)
+                    self._screen._ws.klippy.set_tool_temp(self._printer.get_tool_number(heater), target)
                 elif heater.startswith('heater_bed'):
                     target = self.preheat_options[setting]["bed"]
-                    if target > 0 and target <= MAX_TEMP:
-                        self._screen._ws.klippy.set_bed_temp(target)
+                    self._screen._ws.klippy.set_bed_temp(target)
                 elif heater.startswith('heater_generic '):
                     target = self.preheat_options[setting]["heater_generic"]
-                    if target > 0 and target <= MAX_TEMP:
-                        self._screen._ws.klippy.set_heater_temp(" ".join(heater.split(" ")[1:]), target)
+                    self._screen._ws.klippy.set_heater_temp(" ".join(heater.split(" ")[1:]), target)
                 elif heater.startswith('temperature_fan '):
                     target = self.preheat_options[setting]["temperature_fan"]
-                    if target > 0 and target <= MAX_TEMP:
-                        self._screen._ws.klippy.set_temp_fan_temp(" ".join(heater.split(" ")[1:]), target)
+                    self._screen._ws.klippy.set_temp_fan_temp(" ".join(heater.split(" ")[1:]), target)
                 else:
                     logging.info("Unknown heater: %s" % heater)
                     self._screen.show_popup_message(_("Unknown Heater") + heater)
-                if target <= MAX_TEMP:
-                    if target > 0:
-                        self._printer.set_dev_stat(heater, "target", int(target))
-                        logging.info("Setting %s to %d" % (heater, target))
-                else:
-                    self._screen.show_popup_message(_("Can't set above the maximum:") + (" %s" % MAX_TEMP))
+                self._printer.set_dev_stat(heater, "target", int(target))
+                logging.info("Setting %s to %d" % (heater, target))
             if self.preheat_options[setting]['gcode']:
                 self._screen._ws.klippy.gcode_script(self.preheat_options[setting]['gcode'])
 
@@ -349,7 +340,7 @@ class TemperaturePanel(ScreenPanel):
             self._screen._ws.klippy.set_temp_fan_temp(" ".join(self.active_heater.split(" ")[1:]), temp)
         else:
             logging.info("Unknown heater: %s" % self.active_heater)
-            self._screen.show_popup_message(_("Unknown Heater ") + self.active_heater)
+            self._screen.show_popup_message(_("Unknown Heater") + self.active_heater)
         self._printer.set_dev_stat(self.active_heater, "target", temp)
 
     def create_left_panel(self):
@@ -400,7 +391,6 @@ class TemperaturePanel(ScreenPanel):
             self.add_device(d)
         graph_height = max(0, self._screen.height - (i * 6 * self._gtk.get_font_size()))
         self.labels['da'].set_size_request(0, graph_height)
-
         return box
 
 
