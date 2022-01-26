@@ -147,6 +147,8 @@ class KlipperScreenConfig:
             {"print_estimate_compensation": {
                 "section": "main", "name": _("Slicer Time correction (%)"), "type": "scale", "value": "100",
                 "range": [50, 150], "step": 1}},
+            {"only_heaters": {"section": "main", "name": _("Show Only Heaters in Temp."), "type": "binary",
+                              "value": "False", "callback": screen.restart_warning}},
             # {"": {"section": "main", "name": _(""), "type": ""}}
         ]
 

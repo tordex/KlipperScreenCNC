@@ -60,6 +60,8 @@ class SystemPanel(ScreenPanel):
         scroll.set_property("overlay-scrolling", False)
         scroll.set_vexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.add_events(Gdk.EventMask.TOUCH_MASK)
+        scroll.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
         infogrid = Gtk.Grid()
         infogrid.get_style_context().add_class("system-program-grid")
@@ -162,6 +164,8 @@ class SystemPanel(ScreenPanel):
         scroll.set_hexpand(True)
         scroll.set_vexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.add_events(Gdk.EventMask.TOUCH_MASK)
+        scroll.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
         grid = Gtk.Grid()
         grid.set_column_homogeneous(True)
@@ -274,6 +278,8 @@ class SystemPanel(ScreenPanel):
         scroll.set_hexpand(True)
         scroll.set_vexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.add_events(Gdk.EventMask.TOUCH_MASK)
+        scroll.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
         self.labels['update_progress'] = Gtk.Label("%s %s..." % (_("Starting recovery for"), program))
         self.labels['update_progress'].set_halign(Gtk.Align.START)
@@ -319,6 +325,8 @@ class SystemPanel(ScreenPanel):
         scroll.set_hexpand(True)
         scroll.set_vexpand(True)
         scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        scroll.add_events(Gdk.EventMask.TOUCH_MASK)
+        scroll.add_events(Gdk.EventMask.BUTTON_PRESS_MASK)
 
         self.labels['update_progress'] = Gtk.Label("%s %s..." % (_("Starting update for"), program))
         self.labels['update_progress'].set_halign(Gtk.Align.START)
@@ -351,38 +359,35 @@ class SystemPanel(ScreenPanel):
         logging.info("%s: %s" % (p, info))
 
         if p != "system":
-            version = (info['full_version_string'] if "full_version_string" in info else info['version'])
             if info['configured_type'] == 'git_repo':
                 if info['is_valid'] and not info['is_dirty']:
                     if info['version'] == info['remote_version']:
-                        self.labels[p].set_markup("<b>%s</b>\n%s" % (p, version))
+                        self.labels[p].set_markup("<b>%s</b>\n%s" % (p, info['version']))
                         self.labels["%s_status" % p].set_label(_("Up To Date"))
                         self.labels["%s_status" % p].get_style_context().remove_class('update')
                         self.labels["%s_status" % p].get_style_context().remove_class('invalid')
                         self.labels["%s_status" % p].set_sensitive(False)
                     else:
-                        self.labels[p].set_markup("<b>%s</b>\n%s -> %s" % (p, version, info['remote_version']))
+                        self.labels[p].set_markup("<b>%s</b>\n%s -> %s" % (p, info['version'], info['remote_version']))
                         self.labels["%s_status" % p].set_label(_("Update"))
                         self.labels["%s_status" % p].get_style_context().add_class('update')
                         self.labels["%s_status" % p].set_sensitive(True)
                 else:
-                    self.labels[p].set_markup("<b>%s</b>\n%s" % (p, version))
+                    self.labels[p].set_markup("<b>%s</b>\n%s" % (p, info['version']))
                     self.labels["%s_status" % p].set_label(_("Invalid"))
                     self.labels["%s_status" % p].get_style_context().add_class('invalid')
                     self.labels["%s_status" % p].set_sensitive(True)
             else:
                 if info['version'] == info['remote_version']:
-                    self.labels[p].set_markup("<b>%s</b>\n%s" % (p, version))
+                    self.labels[p].set_markup("<b>%s</b>\n%s" % (p, info['version']))
                     self.labels["%s_status" % p].set_label(_("Up To Date"))
                     self.labels["%s_status" % p].get_style_context().remove_class('update')
                     self.labels["%s_status" % p].set_sensitive(False)
                 else:
-                    self.labels[p].set_markup("<b>%s</b>\n%s -> %s" % (p, version, info['remote_version']))
+                    self.labels[p].set_markup("<b>%s</b>\n%s -> %s" % (p, info['version'], info['remote_version']))
                     self.labels["%s_status" % p].set_label(_("Update"))
                     self.labels["%s_status" % p].get_style_context().add_class('update')
                     self.labels["%s_status" % p].set_sensitive(True)
-
-
         else:
             self.labels[p].set_markup("<b>System</b>")
             if info['package_count'] == 0:
