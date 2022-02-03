@@ -17,7 +17,7 @@ class JobStatusPanel(ScreenPanel):
     filename = None
     file_metadata = {}
     progress = 0
-    state = "printing"
+    state = "standby"
 
     def __init__(self, screen, title, back=False):
         super().__init__(screen, title, False)
@@ -259,12 +259,7 @@ class JobStatusPanel(ScreenPanel):
     def restart(self, widget):
         if self.filename != "none":
             self._screen._ws.klippy.print_start(self.filename)
-
-            for to in self.close_timeouts:
-                GLib.source_remove(to)
-                self.close_timeouts.remove(to)
-            if self.timeout is None:
-                self.timeout = GLib.timeout_add_seconds(1, self.state_check)
+            self.new_print()
 
     def resume(self, widget):
         self._screen._ws.klippy.print_resume(self._response_callback, "enable_button", "pause", "cancel")
@@ -314,8 +309,8 @@ class JobStatusPanel(ScreenPanel):
         for to in self.close_timeouts:
             GLib.source_remove(to)
             self.close_timeouts.remove(to)
-
-        self._screen.printer_ready()
+        if self.state not in ["printing", "paused"]:
+            self._screen.printer_ready()
         return False
 
     def enable_button(self, *args):
@@ -332,14 +327,13 @@ class JobStatusPanel(ScreenPanel):
             self._files.remove_file_callback(self._callback_metadata)
 
     def new_print(self):
-        if self.state not in ["printing", "paused"]:
-            for to in self.close_timeouts:
-                GLib.source_remove(to)
-                self.close_timeouts.remove(to)
-            if self.timeout is None:
-                GLib.timeout_add_seconds(1, self.state_check)
-            self._screen.wake_screen()
-            self.state_check()
+        for to in self.close_timeouts:
+            GLib.source_remove(to)
+            self.close_timeouts.remove(to)
+        if self.timeout is None:
+            GLib.timeout_add_seconds(1, self.state_check)
+        self._screen.wake_screen()
+        self.state_check()
 
     def process_update(self, action, data):
         if action == "notify_gcode_response":
