@@ -844,6 +844,8 @@ class KlipperScreen(Gtk.Window):
                     self.show_popup_message(data[3:], 2)
                 logging.debug(json.dumps([action, data], indent=2))
 
+        #if action != "notify_proc_stat_update" and action != "notify_status_update":
+        #    logging.info("*****>>> [{}] {}".format(action, data))
         self.base_panel.process_update(action, data)
         if self._cur_panels[-1] in self.subscriptions:
             self.panels[self._cur_panels[-1]].process_update(action, data)

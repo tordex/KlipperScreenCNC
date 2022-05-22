@@ -53,16 +53,9 @@ class JobStatusPanel(ScreenPanel):
         self.labels['status'].set_vexpand(False)
         self.labels['status'].get_style_context().add_class("printing-status")
         self.labels['status'].set_line_wrap(True)
-        self.labels['lcdmessage'] = Gtk.Label("")
-        self.labels['lcdmessage'].set_halign(Gtk.Align.START)
-        self.labels['lcdmessage'].set_vexpand(False)
-        self.labels['lcdmessage'].get_style_context().add_class("printing-status")
-        self.labels['lcdmessage'].set_ellipsize(True)
-        self.labels['lcdmessage'].set_ellipsize(Pango.EllipsizeMode.END)
 
         fi_box.add(self.labels['file'])
         fi_box.add(self.labels['status'])
-        fi_box.add(self.labels['lcdmessage'])
         fi_box.set_valign(Gtk.Align.CENTER)
 
         info = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
@@ -86,32 +79,6 @@ class JobStatusPanel(ScreenPanel):
         overlay.set_vexpand(True)
         overlay.add(self.labels['darea'])
         overlay.add_overlay(box)
-
-        self.labels['thumbnail'] = self._gtk.Image("file", 2)
-
-        i = 0
-        for extruder in self._printer.get_tools():
-            self.labels[extruder + '_box'] = Gtk.Box(spacing=0)
-            self.labels[extruder] = Gtk.Label(label="")
-            self.labels[extruder].get_style_context().add_class("printing-info")
-            if i <= 4:
-                ext_img = self._gtk.Image("extruder-%s" % i, .6)
-                self.labels[extruder + '_box'].add(ext_img)
-            self.labels[extruder + '_box'].add(self.labels[extruder])
-            i += 1
-
-        temp_grid = self._gtk.HomogeneousGrid()
-        self.current_extruder = self._printer.get_stat("toolhead", "extruder")
-        temp_grid.attach(self.labels[self.current_extruder + '_box'], 0, 0, 1, 1)
-        if self._printer.has_heated_bed():
-            heater_bed = self._gtk.Image("bed", .6)
-            self.labels['heater_bed'] = Gtk.Label(label="")
-            self.labels['heater_bed'].get_style_context().add_class("printing-info")
-            heater_bed_box = Gtk.Box(spacing=0)
-            heater_bed_box.add(heater_bed)
-            heater_bed_box.add(self.labels['heater_bed'])
-            temp_grid.attach(heater_bed_box, 1, 0, 1, 1)
-        self.labels['temp_grid'] = temp_grid
 
         # Create time remaining items
         hourglass = self._gtk.Image("hourglass", .6)
@@ -170,40 +137,18 @@ class JobStatusPanel(ScreenPanel):
         speed_box = Gtk.Box(spacing=0)
         speed_box.add(speed)
         speed_box.add(self.labels['speed'])
-        extrusion = self._gtk.Image("extrude", .6)
-        self.labels['extrusion'] = Gtk.Label(label="")
-        self.labels['extrusion'].get_style_context().add_class("printing-info")
-        extrusion_box = Gtk.Box(spacing=0)
-        extrusion_box.add(extrusion)
-        extrusion_box.add(self.labels['extrusion'])
-        fan = self._gtk.Image("fan", .6)
-        self.labels['fan'] = Gtk.Label(label="")
-        self.labels['fan'].get_style_context().add_class("printing-info")
-        fan_box = Gtk.Box(spacing=0)
-        fan_box.add(fan)
-        fan_box.add(self.labels['fan'])
         sfe_grid = self._gtk.HomogeneousGrid()
         sfe_grid.set_hexpand(True)
         sfe_grid.attach(speed_box, 0, 0, 1, 1)
-        sfe_grid.attach(extrusion_box, 1, 0, 1, 1)
-        sfe_grid.attach(fan_box, 2, 0, 1, 1)
         self.labels['sfe_grid'] = sfe_grid
 
-        self.labels['i1_box'] = Gtk.HBox(spacing=0)
-        self.labels['i1_box'].set_vexpand(True)
-        self.labels['i1_box'].get_style_context().add_class("printing-info-box")
-        self.labels['i1_box'].set_valign(Gtk.Align.CENTER)
         self.labels['i2_box'] = Gtk.VBox(spacing=0)
         self.labels['i2_box'].set_vexpand(True)
         self.labels['i2_box'].get_style_context().add_class("printing-info-box")
         self.labels['i2_box'].set_valign(Gtk.Align.CENTER)
         self.labels['info_grid'] = self._gtk.HomogeneousGrid()
-        if self._screen.vertical_mode:
-            self.labels['info_grid'].attach(self.labels['i1_box'], 0, 0, 1, 1)
-            self.labels['info_grid'].attach(self.labels['i2_box'], 0, 1, 1, 1)
-        else:
-            self.labels['info_grid'].attach(self.labels['i1_box'], 0, 0, 2, 1)
-            self.labels['info_grid'].attach(self.labels['i2_box'], 2, 0, 3, 1)
+
+        self.labels['info_grid'].attach(self.labels['i2_box'], 0, 0, 3, 1)
 
         grid.attach(overlay, 0, 0, 1, 1)
         grid.attach(fi_box, 1, 0, 3, 1)
@@ -231,7 +176,6 @@ class JobStatusPanel(ScreenPanel):
         ctx.arc(0, 0, r, 3/2*math.pi, 3/2*math.pi+(self.progress*2*math.pi))
         ctx.stroke()
 
-
     def activate(self):
         _ = self.lang.gettext
         ps = self._printer.get_stat("print_stats")
@@ -240,13 +184,9 @@ class JobStatusPanel(ScreenPanel):
             self.state_timeout = GLib.timeout_add_seconds(1, self.state_check)
 
     def add_labels(self):
-        for child in self.labels['i1_box'].get_children():
-            self.labels['i1_box'].remove(child)
         for child in self.labels['i2_box'].get_children():
             self.labels['i2_box'].remove(child)
 
-        self.labels['i1_box'].add(self.labels['thumbnail'])
-        self.labels['i2_box'].add(self.labels['temp_grid'])
         self.labels['i2_box'].add(self.labels['pos_box'])
         self.labels['i2_box'].add(self.labels['sfe_grid'])
         self.labels['i2_box'].add(self.labels['timegrid'])
@@ -378,48 +318,18 @@ class JobStatusPanel(ScreenPanel):
             return
         _ = self.lang.gettext
 
-        if self._printer.has_heated_bed():
-            self.update_temp(
-                "heater_bed",
-                self._printer.get_dev_stat("heater_bed", "temperature"),
-                self._printer.get_dev_stat("heater_bed", "target")
-            )
-        for x in self._printer.get_tools():
-            self.update_temp(
-                x,
-                self._printer.get_dev_stat(x, "temperature"),
-                self._printer.get_dev_stat(x, "target")
-            )
-
         ps = self._printer.get_stat("print_stats")
-        self.update_message()
-
-        if "toolhead" in data:
-            if "extruder" in data["toolhead"]:
-                if data["toolhead"]["extruder"] != self.current_extruder:
-                    self.labels['temp_grid'].remove_column(0)
-                    self.labels['temp_grid'].insert_column(0)
-                    self.current_extruder = data["toolhead"]["extruder"]
-                    self.labels['temp_grid'].attach(self.labels[self.current_extruder + '_box'], 0, 0, 1, 1)
-                    self._screen.show_all()
 
         if "gcode_move" in data:
             if "gcode_position" in data["gcode_move"]:
                 self.labels['pos_x'].set_text("X: %.2f" % (data["gcode_move"]["gcode_position"][0]))
                 self.labels['pos_y'].set_text("Y: %.2f" % (data["gcode_move"]["gcode_position"][1]))
                 self.labels['pos_z'].set_text("Z: %.2f" % (data["gcode_move"]["gcode_position"][2]))
-            if "extrude_factor" in data["gcode_move"]:
-                self.extrusion = int(round(data["gcode_move"]["extrude_factor"]*100))
-                self.labels['extrusion'].set_text("%3d%%" % self.extrusion)
             if "speed_factor" in data["gcode_move"]:
                 self.speed = int(round(data["gcode_move"]["speed_factor"]*100))
                 self.labels['speed'].set_text("%3d%%" % self.speed)
             if "homing_origin" in data["gcode_move"]:
                 self.zoffset = data["gcode_move"]["homing_origin"][2]
-
-        if "fan" in data and "speed" in data['fan']:
-            self.fan = int(round(self._printer.get_fan_speed("fan", data['fan']['speed']), 2)*100)
-            self.labels['fan'].set_text("%3d%%" % self.fan)
 
         self.state_check()
         if self.state not in ["printing", "paused"]:
@@ -431,8 +341,8 @@ class JobStatusPanel(ScreenPanel):
         else:
             self.update_percent_complete()
 
-        self.update_text("duration", str(self._gtk.formatTimeString(ps['print_duration'])))
-        self.update_text("time_left", self.calculate_time_left(ps['print_duration'], ps['filament_used']))
+        self.update_text("duration", str(self._gtk.formatTimeString(ps['total_duration'])))
+        self.update_text("time_left", self.calculate_time_left(ps['total_duration'], ps['filament_used']))
 
     def calculate_time_left(self, duration=0, filament_used=0):
         total_duration = None
@@ -448,13 +358,6 @@ class JobStatusPanel(ScreenPanel):
                     slicer_time = (self.file_metadata['estimated_time'] * slicer_correction) / spdcomp
                     if slicer_time < duration:
                         slicer_time = None
-
-            if "filament_total" in self.file_metadata:
-                if self.file_metadata['filament_total'] > 0 and filament_used > 0:
-                    if self.file_metadata['filament_total'] > filament_used:
-                        filament_time = duration / (filament_used / self.file_metadata['filament_total'])
-                        if filament_time < duration:
-                            filament_time = None
 
             if self.progress > 0:
                 file_time = duration / self.progress
@@ -583,12 +486,6 @@ class JobStatusPanel(ScreenPanel):
             self.labels['button_grid'].attach(self.labels['menu'], 3, 0, 1, 1)
         self.show_all()
 
-    def show_file_thumbnail(self):
-        if self._files.has_thumbnail(self.filename):
-            pixbuf = self.get_file_image(self.filename, 7, 3.25)
-            if pixbuf is not None:
-                self.labels['thumbnail'].set_from_pixbuf(pixbuf)
-
     def update_filename(self):
         self.filename = self._printer.get_stat('print_stats', 'filename')
         self.update_text("file", os.path.splitext(self._printer.get_stat('print_stats', 'filename'))[0])
@@ -602,11 +499,6 @@ class JobStatusPanel(ScreenPanel):
             if "estimated_time" in self.file_metadata and self.timeleft_type == "slicer":
                 self.update_text("est_time",
                                  str(self._gtk.formatTimeString(self.file_metadata['estimated_time'])))
-            if "thumbnails" in self.file_metadata:
-                tmp = self.file_metadata['thumbnails'].copy()
-                for i in tmp:
-                    i['data'] = ""
-            self.show_file_thumbnail()
         else:
             self.file_metadata = {}
             logging.debug("Cannot find file metadata. Listening for updated metadata")
@@ -639,12 +531,3 @@ class JobStatusPanel(ScreenPanel):
     def update_progress(self):
         self.labels['progress_text'].set_text("%s%%" % (str(min(int(self.progress*100), 100))))
 
-    def update_message(self):
-        msg = self._printer.get_stat("display_status", "message")
-        if type(msg) == str:
-            self.labels['lcdmessage'].set_text(msg)
-
-    def update_temp(self, x, temp, target):
-        self.labels[x].set_markup(
-            "%.1f<big>/</big>%.0f °C" % (temp, target)
-        )

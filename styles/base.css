@@ -30,6 +30,14 @@ button:active {
     background-color: #20303D;
 }
 
+button.action {
+    background: #009384;
+    border: .4em solid #009384;
+    border-radius: 0.4em;
+    font-weight: bold;
+    color: #13181C;
+}
+
 button.color1 {
     border-bottom: .4em solid #ED6500;
     margin: .3em;
@@ -468,6 +476,12 @@ popover button {
 .screensaver button:active {
     background-color: rgba(0, 0, 0, 0.5);
 }
+
+.position {
+    font-size: 1.75em;
+    font-weight: bold;
+}
+
 
 /* Hardcoded values until creation of dynamic CSS updates */
 .graph_label_hidden {padding-left: .9em;} /* .4em on top of normal button padding */
