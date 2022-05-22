@@ -28,6 +28,7 @@ class ToolChangerPanel(ScreenPanel):
         self.labels["tip"].set_text("Step 1: Probe the first tool height with the Probe button")
         self.labels["probe1"].set_text("TOOL #1: ?")
         self.labels["probe2"].set_text("TOOL #2: ?")
+        self._screen._ws.klippy.gcode_script("GET_POSITION")
 
     def initialize(self, panel_name):
         _ = self.lang.gettext
@@ -36,12 +37,15 @@ class ToolChangerPanel(ScreenPanel):
 
         self.labels['pos_z'] = Gtk.Label("Z: 0")
         self.labels['pos_z'].get_style_context().add_class("position")
+        self.labels['pos_z'].set_halign(Gtk.Align.START)
 
         self.labels['probe1'] = Gtk.Label("TOOL #1: ?")
         self.labels['probe1'].get_style_context().add_class("position")
+        self.labels['probe1'].set_halign(Gtk.Align.START)
 
         self.labels['probe2'] = Gtk.Label("TOOL #2: ?")
         self.labels['probe2'].get_style_context().add_class("position")
+        self.labels['probe2'].set_halign(Gtk.Align.START)
 
         self.labels['tip'] = Gtk.Label("Step 1: Probe the first tool height with the Probe button")
         self.labels['tip'].get_style_context().add_class("position")
@@ -168,14 +172,21 @@ class ToolChangerPanel(ScreenPanel):
         result = re.match(r"^//\sprobe at.+z=([+\-\d.]+)", data)
         if result:
             z_len = float(result.group(1))
+            logging.info("### probe result Z: %0.4f" % (z_len))
             if self.first_tool is None:
-                self.labels["probe1"].set_text("TOOL #1: %0.4f" % (z_len))
-                self.first_tool = z_len
+                self.first_tool = z_len - self.gcode_base_z
+                self.labels["probe1"].set_text("TOOL #1: %0.4f" % (self.first_tool))
                 self.labels["tip"].set_text("Step 2: Now change the tool and probe it's height with the Probe button")
             else:
-                self.labels["probe2"].set_text("TOOL #2: %0.4f" % (z_len))
-                self._screen._ws.klippy.gcode_script("G92 %0.4f" % self.first_tool)
+                tool_len = z_len - self.gcode_base_z
+                self.labels["probe2"].set_text("TOOL #2: %0.4f" % (tool_len))
+                self._screen._ws.klippy.gcode_script("G92 Z%0.4f" % self.first_tool)
                 self.labels["tip"].set_text("Done. Press back button")
             
             # Move probe up
             self._screen._ws.klippy.gcode_script("G91\nG1 Z20\nG90")
+            return
+        result = re.findall(r"^//\sgcode base.+Z:([+\-\d.]+).+$", data, re.MULTILINE)
+        if result:
+            self.gcode_base_z = float(result[0])
+            logging.info("### gcode_base: %0.4f" % (self.gcode_base_z))
